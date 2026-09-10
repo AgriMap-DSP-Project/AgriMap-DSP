@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet container must have an explicit height */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Ensure map tiles load above base but below modals */
+.leaflet-pane {
+  z-index: 4 !important;
+}
+.leaflet-control {
+  z-index: 8 !important;
+}
+.leaflet-popup {
+  z-index: 9 !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F3F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #B29BCC;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8A57C0;
+}
+
+@layer components {
+  /* Official V2V Tech Button Styles */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-v2v-deep text-white text-sm font-semibold rounded-xl hover:bg-v2v-violet active:bg-v2v-electric focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md shadow-v2v-deep/20 active:scale-[0.98];
+  }
+  .btn-v2v-gradient {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-v2v-primary text-white text-sm font-bold rounded-xl hover:opacity-95 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md shadow-v2v-purple/30;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-v2v-purple text-white text-sm font-semibold rounded-xl hover:bg-v2v-violet active:bg-v2v-electric focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm active:scale-[0.98];
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-white text-v2v-deep text-sm font-semibold rounded-xl border border-v2v-border hover:bg-v2v-softwhite hover:border-v2v-purple focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98];
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98];
+  }
+
+  .input-field {
+    @apply block w-full px-3.5 py-2.5 bg-white border border-v2v-border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:border-transparent disabled:bg-v2v-softwhite disabled:text-gray-500 transition-all duration-200 shadow-sm;
+  }
+  .label {
+    @apply block text-xs font-bold uppercase tracking-wider text-v2v-deep mb-1.5;
+  }
+  .card {
+    @apply bg-white rounded-2xl border border-v2v-border shadow-sm transition-all duration-200;
+  }
+  .card-hover {
+    @apply bg-white rounded-2xl border border-v2v-border shadow-sm hover:shadow-v2v-card hover:border-v2v-purple/40 hover:-translate-y-0.5 transition-all duration-300;
+  }
+  .card-interactive {
+    @apply bg-white rounded-2xl border border-v2v-border shadow-sm hover:shadow-xl hover:shadow-v2v-deep/10 hover:-translate-y-1 hover:border-v2v-purple/50 transition-all duration-300 cursor-pointer;
+  }
+  .hover-pop {
+    @apply hover:scale-105 active:scale-95 transition-transform duration-200;
+  }
+  .hover-glow {
+    @apply hover:shadow-lg hover:shadow-v2v-purple/20 hover:border-v2v-purple transition-all duration-300;
+  }
+
+  /* Status Badges */
+  .badge-pending {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200;
+  }
+  .badge-verified {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-v2v-deep border border-v2v-purple/30;
+  }
+  .badge-rejected {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200;
+  }
+  .badge-active {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200;
+  }
+
+  /* Decorative Background Pattern Utilities from Style Guide */
+  .pattern-wave {
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(138, 87, 192, 0.15) 0%, transparent 70%),
+      repeating-linear-gradient(45deg, rgba(60, 23, 117, 0.03) 0, rgba(60, 23, 117, 0.03) 2px, transparent 0, transparent 8px);
+  }
+  .pattern-circuit {
+    background-image: radial-gradient(rgba(138, 87, 192, 0.2) 1px, transparent 1px),
+      linear-gradient(to right, rgba(60, 23, 117, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(60, 23, 117, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .pattern-hex {
+    background-color: #F4F3F9;
+    background-image: radial-gradient(rgba(138, 87, 192, 0.18) 1.2px, transparent 1.2px);
+    background-size: 16px 16px;
+  }
+  .pattern-dots {
+    background-image: radial-gradient(#8A57C0 0.75px, transparent 0.75px);
+    background-size: 12px 12px;
+    opacity: 0.25;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.04); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+

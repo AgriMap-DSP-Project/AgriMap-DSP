@@ -1,0 +1,55 @@
+# Linux-only fallback for environments where Docker cannot create bridge/veth
+# interfaces (for example, a nested or restricted container runtime).
+#
+# Run with:
+#   docker compose -f docker-compose.host-network.yml up --build
+#
+# Both services share the host network, so the API reaches PostgreSQL at
+# 127.0.0.1 instead of the normal Docker service hostname ("db"). PostgreSQL
+# uses 5433 so it does not conflict with an existing host PostgreSQL service.
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: agrimap_db_hostnet
+    network_mode: host
+    command: postgres -p 5433
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agrimap_dsp
+    volumes:
+      - pgdata_hostnet:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -p 5433"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      network: host
+    container_name: agrimap_api_hostnet
+    network_mode: host
+    environment:
+      POSTGRES_SERVER: 127.0.0.1
+      POSTGRES_PORT: 5433
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agrimap_dsp
+      JWT_SECRET_KEY: agrimap-dsp-dev-secret-change-in-production-2026
+      UPLOAD_DIR: /app/uploads
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:8080
+      LOG_LEVEL: INFO
+    volumes:
+      - uploads_hostnet:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata_hostnet:
+  uploads_hostnet:

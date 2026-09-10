@@ -1,0 +1,295 @@
+{
+  "info": {
+    "name": "AgriMap DSP API",
+    "description": "Complete API collection for AgriMap DSP — Digital Land Mapping Pre-Assessment Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1" },
+    { "key": "auth_token", "value": "" },
+    { "key": "user_id", "value": "" },
+    { "key": "project_id", "value": "" },
+    { "key": "field_id", "value": "" },
+    { "key": "farmer_id", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{auth_token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"surveyor@agrimap.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Test Surveyor\",\n  \"role\": \"surveyor\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["if (pm.response.code === 201) { pm.collectionVariables.set('user_id', pm.response.json().id); }"]
+            }
+          }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"surveyor@agrimap.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 200) {",
+                "  var json = pm.response.json();",
+                "  pm.collectionVariables.set('auth_token', json.access_token);",
+                "  pm.collectionVariables.set('user_id', json.user_id);",
+                "  pm.test('Login successful', () => pm.expect(json.token_type).to.eql('bearer'));",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Get Current User",
+          "request": { "method": "GET", "url": "{{base_url}}/auth/me" }
+        }
+      ]
+    },
+    {
+      "name": "2. Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/projects/",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Athens Demo Project\",\n  \"description\": \"Digital land mapping pre-assessment for Attica region\",\n  \"status\": \"active\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["if (pm.response.code === 201) { pm.collectionVariables.set('project_id', pm.response.json().id); }"]
+            }
+          }]
+        },
+        {
+          "name": "List Projects",
+          "request": { "method": "GET", "url": "{{base_url}}/projects/?skip=0&limit=20" }
+        },
+        {
+          "name": "Get Project",
+          "request": { "method": "GET", "url": "{{base_url}}/projects/{{project_id}}" }
+        }
+      ]
+    },
+    {
+      "name": "3. Farmers",
+      "item": [
+        {
+          "name": "Create Farmer",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/farmers/",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Nikos Papadopoulos\",\n  \"contact_number\": \"+30-210-1234567\",\n  \"email\": \"nikos@farm.gr\",\n  \"address\": \"Marathonas, Attica\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["if (pm.response.code === 201) { pm.collectionVariables.set('farmer_id', pm.response.json().id); }"]
+            }
+          }]
+        },
+        {
+          "name": "List Farmers",
+          "request": { "method": "GET", "url": "{{base_url}}/farmers/?skip=0&limit=20" }
+        }
+      ]
+    },
+    {
+      "name": "4. Fields",
+      "item": [
+        {
+          "name": "Create Field",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/fields/",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"North Olive Grove\",\n  \"project_id\": \"{{project_id}}\",\n  \"farmer_id\": \"{{farmer_id}}\",\n  \"crop_history_summary\": \"olives\",\n  \"calculated_area_hectares\": 2.5,\n  \"boundary\": {\n    \"type\": \"MultiPolygon\",\n    \"coordinates\": [[[[23.72, 37.98], [23.73, 37.98], [23.73, 37.99], [23.72, 37.99], [23.72, 37.98]]]]\n  }\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["if (pm.response.code === 201) { pm.collectionVariables.set('field_id', pm.response.json().id); }"]
+            }
+          }]
+        },
+        {
+          "name": "List Fields",
+          "request": { "method": "GET", "url": "{{base_url}}/fields/?skip=0&limit=20" }
+        },
+        {
+          "name": "Get Field Boundary",
+          "request": { "method": "GET", "url": "{{base_url}}/fields/{{field_id}}/boundary" }
+        }
+      ]
+    },
+    {
+      "name": "5. Resources",
+      "item": [
+        {
+          "name": "Create Water Resource",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/resources/",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Well\",\n  \"project_id\": \"{{project_id}}\",\n  \"field_id\": \"{{field_id}}\",\n  \"resource_class\": \"WATER\",\n  \"description\": \"Deep borewell, 50m depth\",\n  \"geom\": { \"type\": \"Point\", \"coordinates\": [23.725, 37.985] },\n  \"attributes\": { \"depth_meters\": 50, \"capacity_liters_per_hour\": 2000 }\n}"
+            }
+          }
+        },
+        {
+          "name": "List Resources",
+          "request": { "method": "GET", "url": "{{base_url}}/resources/?skip=0&limit=20" }
+        }
+      ]
+    },
+    {
+      "name": "6. Data Ingestion (Ravi's Platform)",
+      "item": [
+        {
+          "name": "Get CSV Template",
+          "request": { "method": "GET", "url": "{{base_url}}/ingest/templates/resources" }
+        },
+        {
+          "name": "Extract Photo EXIF",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/ingest/photo-exif",
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file", "src": "" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Export (Ravi's Platform)",
+      "item": [
+        {
+          "name": "Export Field GeoJSON",
+          "request": { "method": "GET", "url": "{{base_url}}/export/field/{{field_id}}/geojson" }
+        },
+        {
+          "name": "Export Field CSV",
+          "request": { "method": "GET", "url": "{{base_url}}/export/field/{{field_id}}/csv" }
+        },
+        {
+          "name": "Export Project Summary",
+          "request": { "method": "GET", "url": "{{base_url}}/export/project/{{project_id}}/summary" }
+        }
+      ]
+    },
+    {
+      "name": "8. AI Analysis (Ravi's Platform)",
+      "item": [
+        {
+          "name": "Analyze Field (AI)",
+          "request": { "method": "POST", "url": "{{base_url}}/ai/analyze-field/{{field_id}}" }
+        },
+        {
+          "name": "Get Recommendations",
+          "request": { "method": "GET", "url": "{{base_url}}/ai/recommendations/{{field_id}}" }
+        },
+        {
+          "name": "Natural Language Query",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/ai/query",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Which fields have water sources?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Build Knowledge Index",
+          "request": { "method": "POST", "url": "{{base_url}}/ai/build-index" }
+        }
+      ]
+    },
+    {
+      "name": "9. Devices & Sensors (Ravi's Platform)",
+      "item": [
+        {
+          "name": "Register Device",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/devices/",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_name\": \"Soil Sensor Alpha\",\n  \"device_type\": \"soil_sensor\",\n  \"serial_number\": \"SS-001\",\n  \"manufacturer\": \"AgriSense\",\n  \"field_id\": \"{{field_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Devices",
+          "request": { "method": "GET", "url": "{{base_url}}/devices/?skip=0&limit=20" }
+        }
+      ]
+    },
+    {
+      "name": "10. Integration (Ravi's Platform)",
+      "item": [
+        {
+          "name": "Integration Health",
+          "request": { "method": "GET", "url": "{{base_url}}/integration/health" }
+        },
+        {
+          "name": "Data Exchange Schema",
+          "request": { "method": "GET", "url": "{{base_url}}/integration/schema" }
+        },
+        {
+          "name": "Register Subsystem",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/integration/subsystems/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"crop-monitor\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Crop growth monitoring subsystem\",\n  \"base_url\": \"http://localhost:8001\",\n  \"capabilities\": [\"ndvi_analysis\", \"growth_tracking\"]\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

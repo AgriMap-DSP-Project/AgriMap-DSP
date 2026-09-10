@@ -1,0 +1,17 @@
+# Local Python environments and generated caches must not be copied into the API image.
+venv/
+venv_linux/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Runtime and developer-only artifacts
+uploads/
+.env
+.git/
+.github/
+postman/
+tests/
+*.log
