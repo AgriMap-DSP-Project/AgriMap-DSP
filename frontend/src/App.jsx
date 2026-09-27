@@ -25,10 +25,11 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          {/* Public Landing & Showcase */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Public Gateway & Showcase */}
+          <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register" element={<LoginPage />} />
+          <Route path="/showcase" element={<LandingPage />} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>

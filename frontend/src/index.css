@@ -48,26 +48,26 @@
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-v2v-purple text-white text-sm font-semibold rounded-xl hover:bg-v2v-violet active:bg-v2v-electric focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm active:scale-[0.98];
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-white text-v2v-deep text-sm font-semibold rounded-xl border border-v2v-border hover:bg-v2v-softwhite hover:border-v2v-purple focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-v2v-deep dark:text-purple-300 text-sm font-semibold rounded-xl border border-v2v-border dark:border-slate-700 hover:bg-v2v-softwhite dark:hover:bg-slate-700 hover:border-v2v-purple dark:hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98];
   }
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98];
   }
 
   .input-field {
-    @apply block w-full px-3.5 py-2.5 bg-white border border-v2v-border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:border-transparent disabled:bg-v2v-softwhite disabled:text-gray-500 transition-all duration-200 shadow-sm;
+    @apply block w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-v2v-border dark:border-slate-800 rounded-xl text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-v2v-purple focus:border-transparent disabled:bg-v2v-softwhite dark:disabled:bg-slate-800 disabled:text-gray-500 dark:disabled:text-slate-400 transition-all duration-200 shadow-sm;
   }
   .label {
-    @apply block text-xs font-bold uppercase tracking-wider text-v2v-deep mb-1.5;
+    @apply block text-xs font-bold uppercase tracking-wider text-v2v-deep dark:text-purple-300 mb-1.5;
   }
   .card {
-    @apply bg-white rounded-2xl border border-v2v-border shadow-sm transition-all duration-200;
+    @apply bg-white dark:bg-slate-900 rounded-2xl border border-v2v-border dark:border-slate-800 shadow-sm transition-all duration-200;
   }
   .card-hover {
-    @apply bg-white rounded-2xl border border-v2v-border shadow-sm hover:shadow-v2v-card hover:border-v2v-purple/40 hover:-translate-y-0.5 transition-all duration-300;
+    @apply bg-white dark:bg-slate-900 rounded-2xl border border-v2v-border dark:border-slate-800 shadow-sm hover:shadow-v2v-card dark:hover:shadow-black/40 hover:border-v2v-purple/40 dark:hover:border-purple-500/40 hover:-translate-y-0.5 transition-all duration-300;
   }
   .card-interactive {
-    @apply bg-white rounded-2xl border border-v2v-border shadow-sm hover:shadow-xl hover:shadow-v2v-deep/10 hover:-translate-y-1 hover:border-v2v-purple/50 transition-all duration-300 cursor-pointer;
+    @apply bg-white dark:bg-slate-900 rounded-2xl border border-v2v-border dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-v2v-deep/10 dark:hover:shadow-black/60 hover:-translate-y-1 hover:border-v2v-purple/50 dark:hover:border-purple-500/50 transition-all duration-300 cursor-pointer;
   }
   .hover-pop {
     @apply hover:scale-105 active:scale-95 transition-transform duration-200;
@@ -121,4 +121,117 @@
 .animate-pulse-glow {
   animation: pulseGlow 3s ease-in-out infinite;
 }
+
+/* ────────────────────────────────────────────────────────── */
+/* Professional Dark Mode Global Override Styles              */
+/* ────────────────────────────────────────────────────────── */
+html.dark,
+body.dark {
+  color-scheme: dark;
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark body,
+html.dark #root {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Page containers & App Layout */
+html.dark main,
+html.dark .bg-v2v-softwhite,
+html.dark .bg-\[\#F4F3F9\],
+html.dark .bg-slate-50 {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+/* White surfaces transform into dark slate surfaces */
+html.dark .bg-white {
+  background-color: #111827 !important; /* dark slate-900 */
+  color: #f1f5f9 !important;
+}
+
+/* Header & Navigation top bars */
+html.dark header {
+  background-color: #0f172a !important; /* dark slate-900 header */
+  border-color: #1e293b !important;
+}
+
+/* Cards & Panels */
+html.dark .card,
+html.dark .card-hover,
+html.dark .card-interactive {
+  background-color: #1e293b !important; /* slate-800 card */
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Typography & Headings */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark .text-v2v-deep,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+/* Borders & Dividers */
+html.dark .border-v2v-border,
+html.dark .border-v2v-lavendergray,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: #334155 !important;
+}
+
+/* Form Inputs & Select elements */
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark .input-field {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Table rows & headers */
+html.dark table th {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+html.dark table td {
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark tr:hover {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+/* Badges & Modals */
+html.dark .modal-content {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
 

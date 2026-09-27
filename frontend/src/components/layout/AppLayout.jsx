@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import V2VLogo from '../common/V2VLogo'
+import ThemeToggle from '../common/ThemeToggle'
 
 const NAV_LINKS = [
   { to: '/farmer',         label: 'Farmland Digital Twin',  icon: MapIcon,    roles: ['farmer', 'admin', 'verifier'] },
@@ -24,6 +25,16 @@ export default function AppLayout() {
 
   const currentRole = user?.role || 'farmer'
   const visibleLinks = NAV_LINKS.filter(l => l.roles.includes(currentRole))
+  const homeLink = currentRole === 'farmer' ? '/farmer' : (currentRole === 'admin' || currentRole === 'verifier' ? '/admin/farmers' : '/dashboard')
+
+  const handleGoBack = (e) => {
+    if (e) e.preventDefault()
+    if (window.history.state && typeof window.history.state.idx === 'number' && window.history.state.idx > 0) {
+      navigate(-1)
+    } else {
+      navigate(homeLink || '/')
+    }
+  }
 
   const handleRoleSwitch = (newRole) => {
     // Strict authentication: Farmers CANNOT switch to Admin or Verifier
@@ -42,27 +53,36 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-v2v-softwhite flex">
+    <div className="min-h-screen bg-v2v-softwhite dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors duration-200">
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-v2v-nearblack text-white flex flex-col border-r border-v2v-secondary/30 transform transition-transform duration-200
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-v2v-nearblack dark:bg-slate-900 text-white flex flex-col border-r border-v2v-secondary/30 dark:border-slate-800 transform transition-transform duration-200
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:z-auto`}
       >
-        {/* Logo */}
-        <div className="px-5 py-4 border-b border-v2v-secondary/30 flex items-center justify-between">
-          <Link to="/" className="hover:opacity-90 transition-opacity">
-            <V2VLogo size="md" variant="light" />
-          </Link>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-v2v-deep text-v2v-lavender border border-v2v-lavender/30 uppercase">
+        {/* Logo Header Container (Clickable -> http://localhost:5173/) */}
+        <Link to="/" className="px-5 py-4 border-b border-v2v-secondary/30 dark:border-slate-800 flex items-center justify-between hover:opacity-90 transition-opacity cursor-pointer group">
+          <V2VLogo size="md" variant="light" />
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-v2v-deep dark:bg-slate-800 text-v2v-lavender dark:text-purple-300 border border-v2v-lavender/30 dark:border-slate-700 uppercase group-hover:border-purple-400">
             DSP
           </span>
+        </Link>
+
+        {/* Mode Switcher & Theme Option */}
+        <div className="px-3 pt-3">
+          <div className="bg-v2v-charcoal/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-v2v-secondary/40 dark:border-slate-700/60 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-200">
+              <span>🎨</span>
+              <span>Theme Mode</span>
+            </div>
+            <ThemeToggle variant="pill" />
+          </div>
         </div>
 
         {/* Role Control Panel */}
-        <div className="px-3 pt-3">
+        <div className="px-3 pt-2">
           {currentRole === 'farmer' ? (
             /* Authenticated Farmer View — No switching allowed */
-            <div className="bg-v2v-charcoal p-2.5 rounded-xl border border-v2v-secondary/40 text-xs">
+            <div className="bg-v2v-charcoal dark:bg-slate-800/60 p-2.5 rounded-xl border border-v2v-secondary/40 dark:border-slate-700/50 text-xs">
               <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
                 <span>AUTHENTICATED ROLE:</span>
                 <span className="px-1.5 py-0.2 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[9px] font-bold">VERIFIED</span>
@@ -71,7 +91,7 @@ export default function AppLayout() {
                 <span className="text-base">🧑‍🌾</span>
                 <div className="min-w-0 flex-1">
                   <div className="font-bold text-white text-xs truncate">{user?.full_name || 'Ganesh V.'}</div>
-                  <div className="text-[10px] text-v2v-lavender font-medium">Farmer · Single Farm Access</div>
+                  <div className="text-[10px] text-v2v-lavender dark:text-purple-300 font-medium">Farmer · Single Farm Access</div>
                 </div>
               </div>
               <div className="mt-2 text-[10px] text-gray-400 flex items-center gap-1 border-t border-white/10 pt-1.5">
@@ -81,15 +101,15 @@ export default function AppLayout() {
             </div>
           ) : currentRole === 'verifier' ? (
             /* Verifier Role Switcher — Can switch to Farmer preview, but NOT to Admin */
-            <div className="bg-v2v-charcoal p-2 rounded-xl border border-v2v-secondary/40 text-xs">
+            <div className="bg-v2v-charcoal dark:bg-slate-800/60 p-2 rounded-xl border border-v2v-secondary/40 dark:border-slate-700/50 text-xs">
               <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
                 <span>ACTIVE ROLE:</span>
-                <span className="font-bold text-v2v-lavender uppercase">{currentRole}</span>
+                <span className="font-bold text-v2v-lavender dark:text-purple-300 uppercase">{currentRole}</span>
               </div>
               <select
                 value={currentRole}
                 onChange={(e) => handleRoleSwitch(e.target.value)}
-                className="w-full bg-v2v-nearblack text-white border border-v2v-secondary/50 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-v2v-lavender cursor-pointer"
+                className="w-full bg-v2v-nearblack dark:bg-slate-900 text-white border border-v2v-secondary/50 dark:border-slate-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-v2v-lavender cursor-pointer"
               >
                 <option value="verifier">🛡️ Verifier (Land Verification)</option>
                 <option value="farmer">🧑‍🌾 Farmer View (Preview)</option>
@@ -97,15 +117,15 @@ export default function AppLayout() {
             </div>
           ) : (
             /* Admin Role Switcher — Full control */
-            <div className="bg-v2v-charcoal p-2 rounded-xl border border-v2v-secondary/40 text-xs">
+            <div className="bg-v2v-charcoal dark:bg-slate-800/60 p-2 rounded-xl border border-v2v-secondary/40 dark:border-slate-700/50 text-xs">
               <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
                 <span>ACTIVE ROLE:</span>
-                <span className="font-bold text-v2v-lavender uppercase">{currentRole}</span>
+                <span className="font-bold text-v2v-lavender dark:text-purple-300 uppercase">{currentRole}</span>
               </div>
               <select
                 value={currentRole}
                 onChange={(e) => handleRoleSwitch(e.target.value)}
-                className="w-full bg-v2v-nearblack text-white border border-v2v-secondary/50 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-v2v-lavender cursor-pointer"
+                className="w-full bg-v2v-nearblack dark:bg-slate-900 text-white border border-v2v-secondary/50 dark:border-slate-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-v2v-lavender cursor-pointer"
               >
                 <option value="admin">⚙️ Admin (Full Control)</option>
                 <option value="verifier">🛡️ Land Verifier</option>
@@ -117,7 +137,7 @@ export default function AppLayout() {
 
         {/* Nav Links */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <div className="text-[10px] font-bold text-gray-400 px-3 uppercase tracking-wider mb-2">
+          <div className="text-[10px] font-bold text-gray-400 dark:text-slate-400 px-3 uppercase tracking-wider mb-2">
             Platform Navigation
           </div>
           {visibleLinks.map(({ to, label, icon: Icon }) => (
@@ -128,25 +148,25 @@ export default function AppLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all
                 ${isActive
-                  ? 'bg-v2v-gradient text-white shadow-md shadow-v2v-lavender/25'
-                  : 'text-gray-300 hover:bg-v2v-electric/50 hover:text-white'}`
+                  ? 'bg-v2v-gradient dark:bg-gradient-to-r dark:from-purple-700 dark:to-indigo-600 text-white shadow-md shadow-v2v-lavender/25'
+                  : 'text-gray-300 dark:text-slate-300 hover:bg-v2v-electric/50 dark:hover:bg-slate-800 hover:text-white'}`
               }
             >
-              <Icon className="w-4 h-4 flex-shrink-0 text-v2v-lavender" />
+              <Icon className="w-4 h-4 flex-shrink-0 text-v2v-lavender dark:text-purple-400" />
               <span>{label}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* User info footer */}
-        <div className="px-4 py-4 border-t border-v2v-secondary/30 bg-v2v-charcoal/50">
+        <div className="px-4 py-4 border-t border-v2v-secondary/30 dark:border-slate-800 bg-v2v-charcoal/50 dark:bg-slate-900/80">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-v2v-gradient flex items-center justify-center text-xs font-bold text-white shadow-sm">
               {user?.full_name?.[0]?.toUpperCase() ?? 'V'}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold truncate text-white">{user?.full_name}</div>
-              <div className="text-[10px] text-v2v-lavender capitalize">{currentRole} portal</div>
+              <div className="text-[10px] text-v2v-lavender dark:text-purple-300 capitalize">{currentRole} portal</div>
             </div>
           </div>
           <div className="flex items-center justify-between text-xs pt-1">
@@ -173,23 +193,40 @@ export default function AppLayout() {
 
       {/* ── Main content ── */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar (mobile) */}
-        <header className="lg:hidden sticky top-0 z-30 bg-white border-b border-v2v-lavendergray flex items-center justify-between px-4 h-14">
+        {/* Top bar (Header with theme toggle) */}
+        <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-v2v-border dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 h-14 transition-colors duration-200">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100"
+              className="p-1.5 rounded-md text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 lg:hidden"
             >
               <MenuIcon className="w-5 h-5" />
             </button>
-            <V2VLogo size="sm" />
+            <Link to="/" className="lg:hidden">
+              <V2VLogo size="sm" />
+            </Link>
+            <Link to="/" className="hidden lg:flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-v2v-purple dark:hover:text-purple-300 transition-colors">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>AgriMap DSP Platform</span>
+            </Link>
           </div>
-          <span className="text-xs font-semibold px-2 py-1 rounded bg-purple-50 text-v2v-deep capitalize">
-            {currentRole}
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleGoBack}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-v2v-purple hover:text-white dark:hover:bg-purple-900/60 dark:hover:text-purple-200 border border-slate-200 dark:border-slate-700 transition-all shadow-sm cursor-pointer"
+              title="Go to previous page"
+            >
+              <span className="text-sm font-black">←</span>
+              <span>Go Back</span>
+            </button>
+            <ThemeToggle variant="default" />
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/80 text-v2v-deep dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/50 capitalize">
+              {currentRole}
+            </span>
+          </div>
         </header>
 
-        <main className="flex-1 overflow-auto bg-v2v-softwhite">
+        <main className="flex-1 overflow-auto bg-v2v-softwhite dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
           <Outlet />
         </main>
       </div>

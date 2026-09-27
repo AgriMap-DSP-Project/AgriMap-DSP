@@ -2,10 +2,20 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import V2VLogo from '../components/common/V2VLogo'
 import { useAuth } from '../contexts/AuthContext'
+import ThemeToggle from '../components/common/ThemeToggle'
 
 export default function LandingPage() {
   const { user, loginDemo, logout } = useAuth()
   const navigate = useNavigate()
+
+  const handleGoBack = (e) => {
+    if (e) e.preventDefault()
+    if (window.history.state && typeof window.history.state.idx === 'number' && window.history.state.idx > 0) {
+      navigate(-1)
+    } else {
+      navigate('/')
+    }
+  }
 
   const handleLaunchRole = (role) => {
     loginDemo(role)
@@ -34,31 +44,41 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col selection:bg-v2v-lavender selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100 flex flex-col selection:bg-v2v-lavender selection:text-white transition-colors duration-200">
       {/* ── Top Header / Navbar ── */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-v2v-lavendergray">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-v2v-lavendergray dark:border-slate-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <V2VLogo size="md" />
-            <span className="hidden sm:inline-block px-2.5 py-0.5 text-xs font-semibold text-v2v-deep bg-v2v-softwhite border border-v2v-lavendergray rounded-full">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 text-xs font-semibold text-v2v-deep dark:text-purple-300 bg-v2v-softwhite dark:bg-slate-800 border border-v2v-lavendergray dark:border-slate-700 rounded-full">
               AgriMap DSP
             </span>
           </Link>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <a href="#pillars" className="hover:text-v2v-deep transition-colors">Core Pillars</a>
-            <a href="#farmer-experience" className="hover:text-v2v-deep transition-colors">Farmer Experience</a>
-            <a href="#admin-portal" className="hover:text-v2v-deep transition-colors">Admin Controls</a>
-            <a href="#blueprint" className="hover:text-v2v-deep transition-colors">System Blueprint</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600 dark:text-slate-300">
+            <a href="#pillars" className="hover:text-v2v-deep dark:hover:text-purple-400 transition-colors">Core Pillars</a>
+            <a href="#farmer-experience" className="hover:text-v2v-deep dark:hover:text-purple-400 transition-colors">Farmer Experience</a>
+            <a href="#admin-portal" className="hover:text-v2v-deep dark:hover:text-purple-400 transition-colors">Admin Controls</a>
+            <a href="#blueprint" className="hover:text-v2v-deep dark:hover:text-purple-400 transition-colors">System Blueprint</a>
           </nav>
 
-          {/* Action CTAs */}
+          {/* Action CTAs & Theme Toggle */}
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-v2v-purple hover:text-white dark:hover:bg-purple-900/60 dark:hover:text-purple-200 border border-slate-200 dark:border-slate-700 transition-all shadow-sm cursor-pointer"
+              title="Go to previous page"
+            >
+              <span className="text-sm font-black">←</span>
+              <span>Go Back</span>
+            </button>
+            <ThemeToggle variant="default" />
             {user ? (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 hidden sm:inline">
-                  Logged in as <strong className="text-v2v-deep">{user.full_name}</strong>
+                <span className="text-xs text-gray-500 dark:text-slate-400 hidden sm:inline">
+                  Logged in as <strong className="text-v2v-deep dark:text-purple-300">{user.full_name}</strong>
                 </span>
                 <button
                   onClick={() => handleLaunchRole(user.role || 'farmer')}
@@ -68,7 +88,7 @@ export default function LandingPage() {
                 </button>
                 <button
                   onClick={logout}
-                  className="text-xs text-gray-500 hover:text-rose-600 px-2 py-1"
+                  className="text-xs text-gray-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-2 py-1"
                 >
                   Logout
                 </button>
@@ -77,7 +97,7 @@ export default function LandingPage() {
               <>
                 <Link
                   to="/login"
-                  className="text-sm font-medium text-v2v-deep hover:text-v2v-secondary px-3 py-2"
+                  className="text-sm font-medium text-v2v-deep dark:text-purple-300 hover:text-v2v-secondary dark:hover:text-purple-200 px-3 py-2"
                 >
                   Sign In
                 </Link>
@@ -566,12 +586,12 @@ export default function LandingPage() {
       <footer className="bg-v2v-charcoal text-white border-t border-gray-800 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
               <V2VLogo size="md" variant="light" />
               <span className="text-xs text-gray-400">
                 AgriMap DSP — Digital Land & Systems Platform
               </span>
-            </div>
+            </Link>
 
             <div className="flex flex-wrap items-center gap-6 text-xs text-gray-400">
               <button onClick={() => handleLaunchRole('farmer')} className="hover:text-v2v-lavender transition-colors">Farmer Portal</button>

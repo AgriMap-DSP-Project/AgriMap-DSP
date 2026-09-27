@@ -1,11 +1,14 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * V2V Tech Official Logo Component
  * Uses the official 3D glossy purple bulb (/images/v2v-icon.png)
  * and high-contrast, crystal-clear "V2V Tech — Vision To Value" typography.
+ * Clicking the logo redirects directly to http://localhost:5173/ (first page / login page).
  */
-export default function V2VLogo({ size = 'md', variant = 'full', className = '' }) {
+export default function V2VLogo({ size = 'md', variant = 'full', className = '', onClick }) {
+  const navigate = useNavigate()
   const isLight = variant === 'light'
   
   const sizeMap = {
@@ -17,8 +20,20 @@ export default function V2VLogo({ size = 'md', variant = 'full', className = '' 
   
   const s = sizeMap[size] || sizeMap.md
 
+  const handleClick = (e) => {
+    if (onClick) {
+      onClick(e)
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      navigate('/')
+    }
+  }
+
   return (
-    <div className={`inline-flex items-center gap-3 select-none group cursor-pointer ${className}`}>
+    <div
+      onClick={handleClick}
+      className={`inline-flex items-center gap-3 select-none group cursor-pointer ${className}`}
+    >
       {/* 3D Glossy Purple Bulb Icon */}
       <div className="relative flex-shrink-0">
         <img
@@ -50,4 +65,3 @@ export default function V2VLogo({ size = 'md', variant = 'full', className = '' 
     </div>
   )
 }
-

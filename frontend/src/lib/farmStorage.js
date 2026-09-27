@@ -317,6 +317,8 @@ export const farmStorage = {
     try {
       localStorage.removeItem(STORAGE_KEYS.FARMERS)
       localStorage.removeItem(STORAGE_KEYS.PROJECTS)
+      localStorage.removeItem('farmxt_pending_farmers_v1')
+      localStorage.removeItem('farmxt_user_credentials_v1')
       Object.keys(localStorage).forEach(k => {
         if (k.startsWith(STORAGE_KEYS.GEOJSON_PREFIX)) {
           localStorage.removeItem(k)
@@ -331,6 +333,224 @@ export const farmStorage = {
       /* ignore */
     }
     return true
+  },
+
+  // ── FARM-XT Pending Farmer Registrations & Admin Approval ─────────────────
+  getPendingFarmerRegistrations: () => {
+    const raw = getStoredOrInit('farmxt_pending_farmers_v1', [])
+    // Filter out fake demo registrations (Ramesh Patel, Venkatesh Rao, etc.)
+    const realOnly = (Array.isArray(raw) ? raw : []).filter(item => 
+      item.id !== 'pending-farmer-101' && 
+      item.id !== 'pending-farmer-102' &&
+      item.full_name !== 'Ramesh Patel' &&
+      item.full_name !== 'Venkatesh Rao'
+    )
+    if (realOnly.length !== (Array.isArray(raw) ? raw.length : 0)) {
+      try {
+        localStorage.setItem('farmxt_pending_farmers_v1', JSON.stringify(realOnly))
+      } catch { /* ignore */ }
+    }
+    return realOnly
+  },
+
+  createPendingFarmerRegistration: (data) => {
+    const pendingList = farmStorage.getPendingFarmerRegistrations()
+    const newReg = {
+      id: `pending-farmer-${Date.now()}`,
+      full_name: data.full_name || 'New Farmer',
+      age: data.age || 35,
+      area_region: data.area_region || 'Gujarat',
+      contact_number: data.contact_number || '',
+      land_address: data.land_address || '',
+      area_sq_acres: data.area_sq_acres || '10 Acres',
+      crops_yield: Array.isArray(data.crops_yield) ? data.crops_yield : [data.crops_yield].filter(Boolean),
+      role: 'farmer',
+      status: 'pending_admin_approval',
+      submitted_at: new Date().toISOString(),
+    }
+    const updated = [newReg, ...pendingList]
+    localStorage.setItem('farmxt_pending_farmers_v1', JSON.stringify(updated))
+    return newReg
+  },
+
+  approveFarmerRegistration: (pendingId, assignedEmail, assignedPassword) => {
+    const pendingList = farmStorage.getPendingFarmerRegistrations()
+    const target = pendingList.find(p => p.id === pendingId)
+    if (!target) return null
+
+    // 1. Create official Farmer entity in database
+    const acresNum = parseFloat(target.area_sq_acres) || 10.0
+    const newFarmer = farmStorage.createFarmer({
+      full_name: target.full_name,
+      contact_number: target.contact_number,
+      email: assignedEmail,
+      village: target.area_region,
+      district: target.area_region,
+      state: 'Gujarat',
+      address: target.land_address,
+      total_acres: acresNum,
+      total_hectares: +(acresNum / 2.47105).toFixed(2),
+      khata_number: `Khata-${Math.floor(100 + Math.random() * 900)}`,
+      crops_summary: (target.crops_yield || []).join(', '),
+      status: 'VERIFIED',
+    })
+
+    // 2. Save credentials so farmer can log in
+    const creds = farmStorage.getUserCredentials()
+    const newCred = {
+      email: (assignedEmail || `farmer.${newFarmer.id}@farmxt.com`).toLowerCase().trim(),
+      password: assignedPassword || 'farmer123',
+      role: 'farmer',
+      full_name: target.full_name,
+      farmer_id: newFarmer.id,
+      field_id: newFarmer.field_id,
+      approved_at: new Date().toISOString(),
+    }
+    const updatedCreds = [newCred, ...creds]
+    localStorage.setItem('farmxt_user_credentials_v1', JSON.stringify(updatedCreds))
+
+    // 3. Remove from pending list
+    const remainingPending = pendingList.filter(p => p.id !== pendingId)
+    localStorage.setItem('farmxt_pending_farmers_v1', JSON.stringify(remainingPending))
+
+    return { farmer: newFarmer, credential: newCred }
+  },
+
+  rejectFarmerRegistration: (pendingId) => {
+    const pendingList = farmStorage.getPendingFarmerRegistrations()
+    const remaining = pendingList.filter(p => p.id !== pendingId)
+    localStorage.setItem('farmxt_pending_farmers_v1', JSON.stringify(remaining))
+    return true
+  },
+
+  // ── FARM-XT Credentials Manager ───────────────────────────────────────────
+  getUserCredentials: () => {
+    const initialCreds = [
+      {
+        email: 'admin@v2vtech.com',
+        password: 'admin123',
+        role: 'admin',
+        full_name: 'V2V System Administrator',
+      },
+      {
+        email: 'admin@farmxt.com',
+        password: 'admin123',
+        role: 'admin',
+        full_name: 'FARM-XT Master Admin',
+      },
+      {
+        email: 'farmer@v2vtech.com',
+        password: 'farmer123',
+        role: 'farmer',
+        full_name: 'Ganesh V. (Farmer)',
+        farmer_id: 'farmer-1',
+        field_id: 'field-1',
+      },
+      {
+        email: 'farmer.ganesh@v2vtech.com',
+        password: 'farmer123',
+        role: 'farmer',
+        full_name: 'Ganesh V. (Farmer)',
+        farmer_id: 'farmer-1',
+        field_id: 'field-1',
+      },
+      {
+        email: 'consumer@farmxt.com',
+        password: 'consumer123',
+        role: 'consumer',
+        full_name: 'Ananya Sharma (Consumer)',
+        area_place: 'Anand & Vadodara, Gujarat',
+        contact_number: '+91 98452 11029',
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        last_login_at: new Date(Date.now() - 1800000).toISOString(),
+        is_online: true,
+      },
+      {
+        email: 'dealer@farmxt.com',
+        password: 'dealer123',
+        role: 'dealer',
+        full_name: 'AgriTech Seed & Fertilizer Dealers',
+        area_place: 'Guntur Highway, AP',
+        contact_number: '+91 97112 88431',
+        created_at: new Date(Date.now() - 172800000).toISOString(),
+        last_login_at: new Date(Date.now() - 600000).toISOString(),
+        is_online: true,
+      }
+    ]
+    return getStoredOrInit('farmxt_user_credentials_v1', initialCreds)
+  },
+
+  saveUserCredential: (credData) => {
+    const creds = farmStorage.getUserCredentials()
+    const cleanEmail = (credData.email || '').toLowerCase().trim()
+    const existingIndex = creds.findIndex(c => c.email === cleanEmail && c.role === credData.role)
+    const nowISO = new Date().toISOString()
+    const enriched = {
+      ...credData,
+      created_at: credData.created_at || nowISO,
+      last_login_at: credData.last_login_at || nowISO,
+      is_online: credData.is_online !== undefined ? credData.is_online : true,
+    }
+    
+    if (existingIndex >= 0) {
+      creds[existingIndex] = { ...creds[existingIndex], ...enriched }
+    } else {
+      creds.push(enriched)
+    }
+    localStorage.setItem('farmxt_user_credentials_v1', JSON.stringify(creds))
+    return enriched
+  },
+
+  recordUserLogin: (userOrCred) => {
+    if (!userOrCred || !userOrCred.email) return
+    const creds = farmStorage.getUserCredentials()
+    const cleanEmail = userOrCred.email.toLowerCase().trim()
+    const index = creds.findIndex(c => c.email.toLowerCase() === cleanEmail)
+    const nowISO = new Date().toISOString()
+    if (index >= 0) {
+      creds[index] = {
+        ...creds[index],
+        last_login_at: nowISO,
+        is_online: true,
+        area_place: userOrCred.area_place || creds[index].area_place || 'Not Specified',
+        contact_number: userOrCred.contact_number || creds[index].contact_number || 'N/A',
+      }
+    } else {
+      creds.push({
+        email: cleanEmail,
+        role: userOrCred.role || 'consumer',
+        full_name: userOrCred.full_name || cleanEmail,
+        area_place: userOrCred.area_place || 'Not Specified',
+        contact_number: userOrCred.contact_number || 'N/A',
+        created_at: nowISO,
+        last_login_at: nowISO,
+        is_online: true,
+      })
+    }
+    localStorage.setItem('farmxt_user_credentials_v1', JSON.stringify(creds))
+  },
+
+  getConsumerAndDealerUsers: () => {
+    const creds = farmStorage.getUserCredentials()
+    return creds.filter(c => c.role === 'consumer' || c.role === 'dealer')
+  },
+
+  authenticateUser: (email, password, role) => {
+    const creds = farmStorage.getUserCredentials()
+    const cleanEmail = (email || '').toLowerCase().trim()
+    const cleanPass = (password || '').trim()
+
+    const match = creds.find(c => 
+      c.email.toLowerCase() === cleanEmail &&
+      c.password === cleanPass &&
+      (role ? c.role === role : true)
+    )
+
+    if (match) {
+      farmStorage.recordUserLogin(match)
+    }
+
+    return match || null
   }
 }
 
